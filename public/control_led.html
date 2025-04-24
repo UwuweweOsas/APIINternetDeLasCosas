@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Control del LED</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      background-color: #f7f9fc;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 300px;
+    }
+
+    .card h2 {
+      margin-bottom: 0.5rem;
+    }
+
+    .status {
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+    }
+
+    .on {
+      color: green;
+      font-weight: bold;
+    }
+
+    .off {
+      color: crimson;
+      font-weight: bold;
+    }
+
+    .btn {
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      margin: 0.5rem;
+      cursor: pointer;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-on {
+      background-color: #28a745;
+    }
+
+    .btn-off {
+      background-color: #dc3545;
+    }
+
+    .icon {
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="icon">💡</div>
+    <h2>Control del LED</h2>
+    <div class="status" id="estado">Estado actual: <span class="off">APAGADO</span></div>
+    <button class="btn btn-on" onclick="setLED('on')">🔘 Encender</button>
+    <button class="btn btn-off" onclick="setLED('off')">⭘ Apagar</button>
+  </div>
+
+  <script>
+    const estadoElemento = document.getElementById("estado");
+    const apiUrl = "http://18.116.66.157/api/led"; // Cambia por tu API real
+
+    async function getEstado() {
+      try {
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+        actualizarEstado(data.state);
+      } catch (err) {
+        console.error("Error al obtener el estado del LED:", err);
+      }
+    }
+
+    async function setLED(estado) {
+      try {
+        await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ state: estado })
+        });
+        actualizarEstado(estado);
+      } catch (err) {
+        console.error("Error al cambiar el estado:", err);
+      }
+    }
+
+    function actualizarEstado(estado) {
+      const texto = estado === "on" ? "ENCENDIDO" : "APAGADO";
+      const clase = estado === "on" ? "on" : "off";
+      estadoElemento.innerHTML = `Estado actual: <span class="${clase}">${texto}</span>`;
+    }
+
+    // Actualiza el estado automáticamente cada 5 segundos
+    setInterval(getEstado, 5000);
+    getEstado();
+  </script>
+</body>
+</html>
